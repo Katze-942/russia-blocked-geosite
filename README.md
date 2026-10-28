@@ -2,6 +2,15 @@
 
 Этот проект каждые 6 часов автоматически генерирует GeoSite файлы, в которые включены списки заблокированных Роскомнадзором доменов для различного рода маршрутизаторов трафика и Proxy/VPN приложений.
 
+Форк исключает некорректные записи с пробелами из списка `antifilter.download`,
+сохраняя их в артефакте `rejected-domain-records`.
+
+Релизы дополнены лёгкими `geosite-katze.dat` и `geoip-katze.dat` с SHA-256.
+Категории задаются в списках [GeoSite](categories/geosite-katze.txt) и
+[GeoIP](categories/geoip-katze.txt); обновляйте их при изменении конфигов.
+Для замены стандартных баз используйте имена `geosite.dat` и `geoip.dat`
+и настройте автообновление на лёгкие файлы.
+
 Данные о блокировках роскомнадзора получаются из следующих источников:
 - [antifilter.download](https://antifilter.download/)
 - [community.antifilter.download](https://community.antifilter.download/)
@@ -36,15 +45,19 @@
 
 По ссылкам ниже всегда доступна последняя версия файлов.
 
+- **Облегчённые базы Katze**
+    - [geosite-katze.dat](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geosite-katze.dat) · [SHA-256](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geosite-katze.dat.sha256sum)
+    - [geoip-katze.dat](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geoip-katze.dat) · [SHA-256](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geoip-katze.dat.sha256sum)
+
 - **github**
-    - [https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/release/geosite.dat](https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/release/geosite.dat)
-    - Hashsum: [https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/release/geosite.dat.sha256sum](https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/release/geosite.dat.sha256sum)
+    - [https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geosite.dat](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geosite.dat)
+    - Hashsum: [https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geosite.dat.sha256sum](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geosite.dat.sha256sum)
 - **JSDelivr**
-    - [https://cdn.jsdelivr.net/gh/runetfreedom/russia-blocked-geosite@release/geosite.dat](https://cdn.jsdelivr.net/gh/runetfreedom/russia-blocked-geosite@release/geosite.dat)
-    - Hashsum: [https://cdn.jsdelivr.net/gh/runetfreedom/russia-blocked-geosite@release/geosite.dat.sha256sum](https://cdn.jsdelivr.net/gh/runetfreedom/russia-blocked-geosite@release/geosite.dat.sha256sum)
+    - [https://cdn.jsdelivr.net/gh/Katze-942/russia-blocked-geosite@release/geosite.dat](https://cdn.jsdelivr.net/gh/Katze-942/russia-blocked-geosite@release/geosite.dat)
+    - Hashsum: [https://cdn.jsdelivr.net/gh/Katze-942/russia-blocked-geosite@release/geosite.dat.sha256sum](https://cdn.jsdelivr.net/gh/Katze-942/russia-blocked-geosite@release/geosite.dat.sha256sum)
 - **Fastly + JSDelivr**
-    - [https://fastly.jsdelivr.net/gh/runetfreedom/russia-blocked-geosite@release/geosite.dat](https://fastly.jsdelivr.net/gh/runetfreedom/russia-blocked-geosite@release/geosite.dat)
-    - Hashsum: [https://fastly.jsdelivr.net/gh/runetfreedom/russia-blocked-geosite@release/geosite.dat.sha256sum](https://fastly.jsdelivr.net/gh/runetfreedom/russia-blocked-geosite@release/geosite.dat.sha256sum)
+    - [https://fastly.jsdelivr.net/gh/Katze-942/russia-blocked-geosite@release/geosite.dat](https://fastly.jsdelivr.net/gh/Katze-942/russia-blocked-geosite@release/geosite.dat)
+    - Hashsum: [https://fastly.jsdelivr.net/gh/Katze-942/russia-blocked-geosite@release/geosite.dat.sha256sum](https://fastly.jsdelivr.net/gh/Katze-942/russia-blocked-geosite@release/geosite.dat.sha256sum)
 
 
 ## Cмежные проекты

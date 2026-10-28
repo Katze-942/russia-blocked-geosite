@@ -5,14 +5,22 @@ on:
     - cron: "0 3,9,15,21 * * *"
   push:
     branches:
-      - master
+      - main
     paths-ignore:
       - "**/README.md"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
     steps:
+      - name: Checkout build scripts
+        uses: actions/checkout@v4
+
       - name: Set variables
         run: |
           echo "RELEASE_NAME=Released on $(date +%Y%m%d%H%M)" >> $GITHUB_ENV
@@ -59,15 +67,19 @@ jobs:
 
       - name: Get and add domain lists
         run: |          
-          curl -sSL $ANTIFILTER_DOWNLOAD > ./antifilter-download.txt
-          curl -sSL $ANTIFILTER_DOWNLOAD_COMMUNITY > ./antifilter-download-community.txt
-          curl -sSL $REFILTER_ALL > ./refilter.txt
-          curl -sSL $WIN_SPY | grep "0.0.0.0" | awk '{print $2}' > ./win-spy.txt
-          curl -sSL $WIN_UPDATE | grep "0.0.0.0" | awk '{print $2}' > ./win-update.txt
-          curl -sSL $WIN_EXTRA | grep "0.0.0.0" | awk '{print $2}' > ./win-extra.txt
+          curl --fail --silent --show-error --location --retry 3 "$ANTIFILTER_DOWNLOAD" > ./antifilter-download.txt
+          curl --fail --silent --show-error --location --retry 3 "$ANTIFILTER_DOWNLOAD_COMMUNITY" > ./antifilter-download-community.txt
+          curl --fail --silent --show-error --location --retry 3 "$REFILTER_ALL" > ./refilter.txt
+          curl --fail --silent --show-error --location --retry 3 "$WIN_SPY" | grep "0.0.0.0" | awk '{print $2}' > ./win-spy.txt
+          curl --fail --silent --show-error --location --retry 3 "$WIN_UPDATE" | grep "0.0.0.0" | awk '{print $2}' > ./win-update.txt
+          curl --fail --silent --show-error --location --retry 3 "$WIN_EXTRA" | grep "0.0.0.0" | awk '{print $2}' > ./win-extra.txt
           
-          curl -sSL $GFW > ./community/data/gfw.txt
-          curl -sSL $GREATFIRE > ./community/data/greatfire.txt
+          curl --fail --silent --show-error --location --retry 3 "$GFW" > ./community/data/gfw.txt
+          curl --fail --silent --show-error --location --retry 3 "$GREATFIRE" > ./community/data/greatfire.txt
+
+          python3 scripts/filter-plain-domains.py antifilter-download.txt antifilter-download.filtered.txt \
+            --rejected diagnostics/antifilter-download-rejected.jsonl
+          mv antifilter-download.filtered.txt antifilter-download.txt
           
           cp {antifilter-download,antifilter-download-community,refilter,win-spy,win-update,win-extra}.txt ./community/data/
           for f in ./community/data/*.txt; do mv "$f" "${f//.txt/}"; done
@@ -77,8 +89,8 @@ jobs:
 
       - name: Build ad block
         run: |
-          curl -sSL $ADGUARD_DNS_REJECT_URL | perl -ne '/^\|\|([-_0-9a-zA-Z]+(\.[-_0-9a-zA-Z]+){1,64})\^$/ && print "$1\n"' | perl -ne 'print if not /^[0-9]{1,3}(\.[0-9]{1,3}){3}$/' > temp-reject.txt
-          curl -sSL $PETERLOWE_REJECT_URL | perl -ne '/^127\.0\.0\.1\s([-_0-9a-zA-Z]+(\.[-_0-9a-zA-Z]+){1,64})$/ && print "$1\n"' >> temp-reject.txt
+          curl --fail --silent --show-error --location --retry 3 "$ADGUARD_DNS_REJECT_URL" | perl -ne '/^\|\|([-_0-9a-zA-Z]+(\.[-_0-9a-zA-Z]+){1,64})\^$/ && print "$1\n"' | perl -ne 'print if not /^[0-9]{1,3}(\.[0-9]{1,3}){3}$/' > temp-reject.txt
+          curl --fail --silent --show-error --location --retry 3 "$PETERLOWE_REJECT_URL" | perl -ne '/^127\.0\.0\.1\s([-_0-9a-zA-Z]+(\.[-_0-9a-zA-Z]+){1,64})$/ && print "$1\n"' >> temp-reject.txt
           sed -i '/t.co/d' temp-reject.txt
           cat temp-reject.txt | sort --ignore-case -u > ./community/data/category-ads-all
 
@@ -111,6 +123,34 @@ jobs:
           install -p ./custom/publish/{ru-blocked,ru-blocked-all,discord,youtube,google,private,category-ads-all}.txt ./publish/
           
           (cd ./publish && sha256sum geosite.dat > geosite.dat.sha256sum)
+
+      - name: Build Katze geodata
+        run: |
+          mkdir -p geoip-source
+          repo=https://github.com/runetfreedom/russia-blocked-geoip
+          commit=$(git ls-remote "$repo.git" refs/heads/release | awk '{print $1}')
+          [[ "$commit" =~ ^[0-9a-f]{40}$ ]]
+          base="https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/$commit"
+          curl --fail --silent --show-error --location --retry 3 "$base/geoip.dat" -o geoip-source/geoip.dat
+          curl --fail --silent --show-error --location --retry 3 "$base/geoip.dat.sha256sum" -o geoip-source/geoip.dat.sha256sum
+          (cd geoip-source && sha256sum --check --strict geoip.dat.sha256sum)
+
+          python3 scripts/select-geodata.py publish/geosite.dat publish/geosite-katze.dat --categories categories/geosite-katze.txt
+          python3 scripts/select-geodata.py geoip-source/geoip.dat publish/geoip-katze.dat --categories categories/geoip-katze.txt
+          cp categories/geosite-katze.txt categories/geoip-katze.txt publish/
+          printf 'Workflow commit: %s\nGeoIP source: %s/tree/%s\n' \
+            "$GITHUB_SHA" "$repo" "$commit" > publish/KATZE_GEODATA_SOURCE
+          sha256sum publish/geosite.dat geoip-source/geoip.dat >> publish/KATZE_GEODATA_SOURCE
+          (cd publish && sha256sum geosite-katze.dat > geosite-katze.dat.sha256sum)
+          (cd publish && sha256sum geoip-katze.dat > geoip-katze.dat.sha256sum)
+
+      - name: Upload rejected input records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rejected-domain-records
+          path: diagnostics/
+          if-no-files-found: ignore
 
       - name: Release and upload assets
         uses: svenstaro/upload-release-action@v2
