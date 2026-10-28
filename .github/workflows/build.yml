@@ -124,25 +124,13 @@ jobs:
           
           (cd ./publish && sha256sum geosite.dat > geosite.dat.sha256sum)
 
-      - name: Build Katze geodata
+      - name: Build Katze GeoSite
         run: |
-          mkdir -p geoip-source
-          repo=https://github.com/runetfreedom/russia-blocked-geoip
-          commit=$(git ls-remote "$repo.git" refs/heads/release | awk '{print $1}')
-          [[ "$commit" =~ ^[0-9a-f]{40}$ ]]
-          base="https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/$commit"
-          curl --fail --silent --show-error --location --retry 3 "$base/geoip.dat" -o geoip-source/geoip.dat
-          curl --fail --silent --show-error --location --retry 3 "$base/geoip.dat.sha256sum" -o geoip-source/geoip.dat.sha256sum
-          (cd geoip-source && sha256sum --check --strict geoip.dat.sha256sum)
-
           python3 scripts/select-geodata.py publish/geosite.dat publish/geosite-katze.dat --categories categories/geosite-katze.txt
-          python3 scripts/select-geodata.py geoip-source/geoip.dat publish/geoip-katze.dat --categories categories/geoip-katze.txt
-          cp categories/geosite-katze.txt categories/geoip-katze.txt publish/
-          printf 'Workflow commit: %s\nGeoIP source: %s/tree/%s\n' \
-            "$GITHUB_SHA" "$repo" "$commit" > publish/KATZE_GEODATA_SOURCE
-          sha256sum publish/geosite.dat geoip-source/geoip.dat >> publish/KATZE_GEODATA_SOURCE
+          cp categories/geosite-katze.txt publish/
+          printf 'Workflow commit: %s\n' "$GITHUB_SHA" > publish/KATZE_GEODATA_SOURCE
+          sha256sum publish/geosite.dat >> publish/KATZE_GEODATA_SOURCE
           (cd publish && sha256sum geosite-katze.dat > geosite-katze.dat.sha256sum)
-          (cd publish && sha256sum geoip-katze.dat > geoip-katze.dat.sha256sum)
 
       - name: Upload rejected input records
         if: always()

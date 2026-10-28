@@ -5,11 +5,11 @@
 Форк исключает некорректные записи с пробелами из списка `antifilter.download`,
 сохраняя их в артефакте `rejected-domain-records`.
 
-Релизы дополнены лёгкими `geosite-katze.dat` и `geoip-katze.dat` с SHA-256.
-Категории задаются в списках [GeoSite](categories/geosite-katze.txt) и
-[GeoIP](categories/geoip-katze.txt); обновляйте их при изменении конфигов.
-Для замены стандартных баз используйте имена `geosite.dat` и `geoip.dat`
-и настройте автообновление на лёгкие файлы.
+Релизы дополнены лёгким `geosite-katze.dat` с SHA-256.
+Категории задаются в [списке GeoSite](categories/geosite-katze.txt); обновляйте его
+при изменении конфигов. Для замены стандартной базы используйте имя `geosite.dat`
+и настройте автообновление на лёгкий файл. Лёгкий GeoIP собирается в
+[Katze-942/russia-blocked-geoip](https://github.com/Katze-942/russia-blocked-geoip).
 
 Данные о блокировках роскомнадзора получаются из следующих источников:
 - [antifilter.download](https://antifilter.download/)
@@ -47,7 +47,6 @@
 
 - **Облегчённые базы Katze**
     - [geosite-katze.dat](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geosite-katze.dat) · [SHA-256](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geosite-katze.dat.sha256sum)
-    - [geoip-katze.dat](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geoip-katze.dat) · [SHA-256](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geoip-katze.dat.sha256sum)
 
 - **github**
     - [https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geosite.dat](https://raw.githubusercontent.com/Katze-942/russia-blocked-geosite/release/geosite.dat)
