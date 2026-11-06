@@ -12,6 +12,7 @@ discord
 gofundme
 google
 google-gemini
+google-play
 habr
 hbo
 instagram
